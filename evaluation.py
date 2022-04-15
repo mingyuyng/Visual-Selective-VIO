@@ -66,7 +66,7 @@ class kittiOdomEval():
             dx = P1[0,3] - P2[0,3]
             dy = P1[1,3] - P2[1,3]
             dz = P1[2,3] - P2[2,3]
-            dist.append(dist[i]+np.sqrt(dx**2+dy**2+dz**2))    
+            dist.append(dist[i]+np.sqrt(dx**2+dy**2+dz**2))
         self.distance = dist[-1]
         return dist
 
@@ -97,7 +97,7 @@ class kittiOdomEval():
         # every second, kitti data 10Hz
         self.step_size = 10
         # for all start positions do
-        # for first_frame in range(9, len(poses_gt), self.step_size):        
+        # for first_frame in range(9, len(poses_gt), self.step_size):
         for first_frame in range(0, len(poses_gt), self.step_size):
             # for all segment lengths do
             for i in range(self.num_lengths):
@@ -109,7 +109,7 @@ class kittiOdomEval():
                 # Continue if sequence not long enough
                 if last_frame == -1 or not(last_frame in poses_result.keys()) or not(first_frame in poses_result.keys()):
                     continue
-                                
+
                 # compute rotational and translational errors, relative pose error (RPE)
                 pose_delta_gt = np.dot(np.linalg.inv(poses_gt[first_frame]), poses_gt[last_frame])
                 pose_delta_result = np.dot(np.linalg.inv(poses_result[first_frame]), poses_result[last_frame])
@@ -118,18 +118,18 @@ class kittiOdomEval():
                 r_err = self.rotationError(pose_error)
                 t_err = self.translationError(pose_error)
 
-                # compute speed 
+                # compute speed
                 num_frames = last_frame - first_frame + 1.0
                 speed = len_ / (0.1*num_frames)   # 10Hz
                 if speed > self.max_speed:
                     self.max_speed = speed
                 err.append([first_frame, r_err/len_, t_err/len_, len_, speed])
         return err
-    
+
     def calcSpeed(self, poses_gt, poses_result):
         speed_err_gt_list = []
         speed_err_est_list = []
-        # for all start positions do        
+        # for all start positions do
         for first_frame in range(len(poses_gt)-1):
             # compute rotational and translational errors, relative pose error (RPE)
             pose_error_gt = np.dot(np.linalg.inv(poses_gt[first_frame]), poses_gt[first_frame+1])
@@ -158,10 +158,10 @@ class kittiOdomEval():
             t_err += item[2]
         ave_t_err = t_err / seq_len
         ave_r_err = r_err / seq_len
-        return ave_t_err, ave_r_err 
+        return ave_t_err, ave_r_err
 
     def plotPath_2D(self, seq, poses_gt, poses_result, plot_path_dir, decision, speed):
-        
+
         fontsize_ = 10
         plot_keys = ["Ground Truth", "Ours"]
         start_point = [0, 0]
@@ -170,7 +170,7 @@ class kittiOdomEval():
         style_O = 'ko'
 
         ### get the value
-        if poses_gt: 
+        if poses_gt:
             poses_gt = [(k,poses_gt[k]) for k in sorted(poses_gt.keys())]
             x_gt = np.asarray([pose[0,3] for _,pose in poses_gt])
             y_gt = np.asarray([pose[1,3] for _,pose in poses_gt])
@@ -179,7 +179,7 @@ class kittiOdomEval():
         x_pred = np.asarray([pose[0,3] for _,pose in poses_result])
         y_pred = np.asarray([pose[1,3] for _,pose in poses_result])
         z_pred = np.asarray([pose[2,3] for _,pose in poses_result])
-        
+
         fig = plt.figure(figsize=(20,6), dpi=100)
         ### plot the figure
         plt.subplot(1,3,1)
@@ -201,7 +201,7 @@ class kittiOdomEval():
                             for lim in lims])
         ax.set_xlim([xmean - plot_radius, xmean + plot_radius])
         ax.set_ylim([ymean - plot_radius, ymean + plot_radius])
-        
+
         plt.subplot(1,3,2)
         ax = plt.gca()
         cout = np.insert(decision, 0, 0) * 100
@@ -216,7 +216,7 @@ class kittiOdomEval():
         ax.set_ylim([ymean - plot_radius, ymean + plot_radius])
         cbar = fig.colorbar(cax, ticks=[0, 5, 10, 15, 20])
         cbar.ax.set_yticklabels(['0%', '5%', '10%', '15%', '20%'])
-        
+
 
         plt.subplot(1,3,3)
         ax = plt.gca()
@@ -235,12 +235,12 @@ class kittiOdomEval():
 
 
         png_title = "{}_path".format(seq)
-        plt.savefig(plot_path_dir +  "/" + png_title + ".png", bbox_inches='tight', pad_inches=0.1)    
+        plt.savefig(plot_path_dir +  "/" + png_title + ".png", bbox_inches='tight', pad_inches=0.1)
         plt.close()
-    
+
 
     def plotpolicy(self, seq, plot_path_dir, decision, prob):
-        
+
         fontsize_ = 10
         plot_keys = ["probability", "decisions"]
         start_point = [0, 0]
@@ -248,7 +248,7 @@ class kittiOdomEval():
         style_gt = 'r-'
         style_O = 'ko'
 
-        
+
         fig = plt.figure(figsize=(20,6), dpi=100)
         ### plot the figure
         ax = plt.gca()
@@ -260,7 +260,7 @@ class kittiOdomEval():
         ### set the range of x and y
 
         png_title = "{}_prob".format(seq)
-        plt.savefig(plot_path_dir +  "/" + png_title + ".png", bbox_inches='tight', pad_inches=0.1)    
+        plt.savefig(plot_path_dir +  "/" + png_title + ".png", bbox_inches='tight', pad_inches=0.1)
         plt.close()
 
 
@@ -276,7 +276,7 @@ class kittiOdomEval():
         ### set the range of x and y
 
         png_title = "{}_prob_zoom".format(seq)
-        plt.savefig(plot_path_dir +  "/" + png_title + ".png", bbox_inches='tight', pad_inches=0.1)    
+        plt.savefig(plot_path_dir +  "/" + png_title + ".png", bbox_inches='tight', pad_inches=0.1)
         plt.close()
 
 
@@ -337,7 +337,7 @@ class kittiOdomEval():
     def call_evo_traj(self, pred_file, save_file, gt_file=None, plot_plane='xy'):
         command = ''
         if os.path.exists(save_file): os.remove(save_file)
-        
+
         if gt_file != None:
             command = ("evo_traj kitti %s --ref=%s --plot_mode=%s --save_plot=%s") \
                         % (pred_file, gt_file, plot_plane, save_file)
@@ -353,25 +353,20 @@ class kittiOdomEval():
 
         decision = np.insert(decision, 0, 1)
         prob = np.insert(prob[:,0], 0, 1)
-        
         decision_smooth = moving_average(decision , self.opt.window_size)
-
         eval_dir = self.result_dir
 
-        if not os.path.exists(eval_dir): os.makedirs(eval_dir)        
+        if not os.path.exists(eval_dir): os.makedirs(eval_dir)
         total_err = []
-        ave_errs = {}       
-        
+        ave_errs = {}
+
         eva_seq_dir = os.path.join(eval_dir, '{}_eval'.format(seq))
         pred_file_name = self.result_dir + '/{}_pred.txt'.format(seq)
         gt_file_name   = self.gt_dir + '/{}.txt'.format(seq)
-        save_file_name = eva_seq_dir + '/{}.pdf'.format(seq)
         assert os.path.exists(pred_file_name), "File path error: {}".format(pred_file_name)
-             
-        poses_result = self.loadPoses(pred_file_name)
+        if not os.path.exists(eva_seq_dir): os.makedirs(eva_seq_dir)
 
-        if not os.path.exists(eva_seq_dir): os.makedirs(eva_seq_dir) 
-          
+        poses_result = self.loadPoses(pred_file_name)
         poses_gt = self.loadPoses(gt_file_name)
 
         # ----------------------------------------------------------------------
@@ -379,7 +374,7 @@ class kittiOdomEval():
         seq_err = self.calcSequenceErrors(poses_gt, poses_result)
         self.saveSequenceErrors(seq_err, eva_seq_dir + '/{}_error.txt'.format(seq))
         total_err += seq_err
-        speed_gt, speed_est = self.calcSpeed(poses_gt, poses_result) 
+        speed_gt, speed_est = self.calcSpeed(poses_gt, poses_result)
 
         # ----------------------------------------------------------------------
         # Compute segment errors
@@ -387,9 +382,9 @@ class kittiOdomEval():
         avg_speed_errs   = self.computeSpeedErr(seq_err)
 
         # ----------------------------------------------------------------------
-        # compute overall error            
+        # compute overall error
         ave_t_err, ave_r_err = self.computeOverallErr(seq_err)
-                        
+
         print ("\nSequence: " + str(seq))
         print ('Distance (m): %d' % self.distance)
         print ('Max speed (km/h): %d' % (self.max_speed*3.6))
@@ -406,45 +401,4 @@ class kittiOdomEval():
         self.plotpolicy(seq, eva_seq_dir, decision, prob)
         plt.close('all')
 
-        # total_avg_segment_errs = self.computeSegmentErr(total_err)
-        # total_avg_speed_errs   = self.computeSpeedErr(total_err)        
-        # self.plotError_segment('total_error_seg', total_avg_segment_errs, eval_dir)
-        # self.plotError_speed('total_error_speed', total_avg_speed_errs, eval_dir)
 
-
-        # if ave_errs:
-        #     with open(eval_dir + '/all_stats.txt', 'w') as f:
-        #         for seq, ave_err in ave_errs.items():
-        #             f.writelines('%s:\n' % seq)
-        #             f.writelines('Average sequence translation RMSE (%):    {0:.4f}\n'.format(ave_err[0] * 100))
-        #             f.writelines('Average sequence rotation error (deg/m):  {0:.4f}\n\n'.format(ave_err[1]/np.pi * 180))
-
-            # parent_path, model_step = os.path.split(os.path.normpath(eval_dir))
-            # with open(os.path.join(parent_path, 'test_statistics.txt'), 'a') as f:
-            #     f.writelines('------------------ %s -----------------\n' % model_step)
-            #     for seq, ave_err in ave_errs.items():
-            #         f.writelines('%s:\n' % seq)
-            #         f.writelines('Average sequence translation RMSE (%):    {0:.4f}\n'.format(ave_err[0] * 100))
-            #         f.writelines('Average sequence rotation error (deg/m):  {0:.4f}\n\n'.format(ave_err[1]/np.pi * 180))
-                      
-        # print ("-------------------------------------------------")
-        # for seq in range(len(ave_t_errs)):
-        #     print ("{0:.2f}".format(ave_t_errs[seq]*100))
-        #     print ("{0:.2f}".format(ave_r_errs[seq]/np.pi*180*100))
-        # print ("-------------------------------------------------")
-
-     
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='KITTI Evaluation toolkit')
-    parser.add_argument('--gt_dir',     type=str, default='./dataset/poses',  help='Directory path of the ground truth odometry')
-    parser.add_argument('--result_dir', type=str, default=f'./result/{par.name}/02', help='Directory path of storing the odometry results')
-    #parser.add_argument('--result_dir', type=str, default=f'.', help='Directory path of storing the odometry results')
-    #parser.add_argument('--eva_seqs',   type=str, default='08_pred', help='The sequences to be evaluated') 
-    parser.add_argument('--eva_seqs',   type=str, default='05_pred,07_pred,10_pred', help='The sequences to be evaluated') 
-    parser.add_argument('--toCameraCoord',   type=lambda x: (str(x).lower() == 'true'), default=False, help='Whether to convert the pose to camera coordinate')
-
-    args = parser.parse_args()
-    pose_eval = kittiOdomEval(args)
-    pose_eval.eval(toCameraCoord=args.toCameraCoord)   # set the value according to the predicted results
-
-    

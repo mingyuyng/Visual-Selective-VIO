@@ -1,16 +1,9 @@
 import argparse
 import os
 import torch
-import models
-import data
 
 
 class BaseOptions():
-    """This class defines options used during both training and test time.
-
-    It also implements several helper functions such as parsing, printing, and saving the options.
-    It also gathers additional options defined in <modify_commandline_options> functions in both dataset class and model class.
-    """ 
 
     def __init__(self):
         """Reset the class; indicates the class hasn't been initailized"""
@@ -23,21 +16,20 @@ class BaseOptions():
         parser.add_argument('--seq_len', type=int, default=11, help='sequence length for test')
         parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
         parser.add_argument('--model_name', type=str, default='vf_512_if_256_3e-05', help='model name to load')
-        parser.add_argument('--save_dir', type=str, default='results', help='model name to load')
-        parser.add_argument('--img_w', type=int, default=512, help='model name to load')
-        parser.add_argument('--img_h', type=int, default=256, help='model name to load')
-        parser.add_argument('--fuse_method', type=str, default='cat', help='model name to load')
-        parser.add_argument('--imu_dropout', type=float, default=0, help='model name to load')
-        parser.add_argument('--test_list', type=list, default=['05', '07', '10'], help='model name to load')
-        parser.add_argument('--window_size', type=int, default=30, help='model name to load')
+        parser.add_argument('--save_dir', type=str, default='results', help='path to save the result')
+        parser.add_argument('--img_w', type=int, default=512, help='image width')
+        parser.add_argument('--img_h', type=int, default=256, help='image height')
+        parser.add_argument('--fuse_method', type=str, default='cat', help='fuse method')
+        parser.add_argument('--imu_dropout', type=float, default=0, help='dropout for the IMU encoder')
+        parser.add_argument('--test_list', type=list, default=['05', '07', '10'], help='sequences to test')
+        parser.add_argument('--window_size', type=int, default=30, help='window size to smooth the decisions')
 
         # model parameters
         parser.add_argument('--rnn_hidden_size', type=int, default=1024, help='size of the LSTM latent')
-        parser.add_argument('--rnn_dropout_out', type=float, default=0.2, help='')
-        parser.add_argument('--rnn_dropout_between', type=float, default=0.2, help='')
-        parser.add_argument('--visual_f_len', type=int, default=512, help='')
-        parser.add_argument('--imu_f_len', type=int, default=256, help='')
-        parser.add_argument('--suffix', default='', type=str, help='customized suffix: opt.name = opt.name + suffix: e.g., {model}_{netG}_size{load_size}')
+        parser.add_argument('--rnn_dropout_out', type=float, default=0.2, help='dropout for the LSTM output layer')
+        parser.add_argument('--rnn_dropout_between', type=float, default=0.2, help='dropout within LSTM')
+        parser.add_argument('--visual_f_len', type=int, default=512, help='visual feature length')
+        parser.add_argument('--imu_f_len', type=int, default=256, help='imu feature length')
 
         self.initialized = True
         return parser
@@ -88,11 +80,6 @@ class BaseOptions():
     def parse(self):
         """Parse our options, create checkpoints directory suffix, and set up gpu device."""
         opt = self.gather_options()
-
-        # process opt.suffix
-        if opt.suffix:
-            suffix = ('_' + opt.suffix.format(**vars(opt))) if opt.suffix != '' else ''
-            opt.name = opt.name + suffix
 
         self.print_options(opt)
 
