@@ -180,9 +180,8 @@ class kittiOdomEval():
         y_pred = np.asarray([pose[1,3] for _,pose in poses_result])
         z_pred = np.asarray([pose[2,3] for _,pose in poses_result])
 
-        fig = plt.figure(figsize=(20,6), dpi=100)
+        fig = plt.figure(figsize=(6,6), dpi=100)
         ### plot the figure
-        plt.subplot(1,3,1)
         ax = plt.gca()
         if poses_gt: plt.plot(x_gt, z_gt, style_gt, label=plot_keys[0])
         plt.plot(x_pred, z_pred, style_pred, label=plot_keys[1])
@@ -201,8 +200,14 @@ class kittiOdomEval():
                             for lim in lims])
         ax.set_xlim([xmean - plot_radius, xmean + plot_radius])
         ax.set_ylim([ymean - plot_radius, ymean + plot_radius])
+        
+        plt.title('2D path')
+        png_title = "{}_path_2d".format(seq)
+        plt.savefig(plot_path_dir +  "/" + png_title + ".png", bbox_inches='tight', pad_inches=0.1)
+        plt.close()
 
-        plt.subplot(1,3,2)
+
+        fig = plt.figure(figsize=(8,6), dpi=100)
         ax = plt.gca()
         cout = np.insert(decision, 0, 0) * 100
         cax = plt.scatter(x_pred, z_pred, marker='o', c=cout)
@@ -214,27 +219,38 @@ class kittiOdomEval():
         ymean = np.mean(ylim)
         ax.set_xlim([xmean - plot_radius, xmean + plot_radius])
         ax.set_ylim([ymean - plot_radius, ymean + plot_radius])
-        cbar = fig.colorbar(cax, ticks=[0, 5, 10, 15, 20])
-        cbar.ax.set_yticklabels(['0%', '5%', '10%', '15%', '20%'])
+        max_usage = max(cout)
+        min_usage = min(cout)
+        ticks = np.floor(np.linspace(min_usage, max_usage, num=5))
+        cbar = fig.colorbar(cax, ticks=ticks)
+        cbar.ax.set_yticklabels([str(i)+'%' for i in ticks])
+        
+        plt.title('decision heatmap with window size {}'.format(self.opt.window_size))
+        png_title = "{}_decision_smoothed".format(seq)
+        plt.savefig(plot_path_dir +  "/" + png_title + ".png", bbox_inches='tight', pad_inches=0.1)
+        plt.close()
+         
 
-
-        plt.subplot(1,3,3)
+        fig = plt.figure(figsize=(8,6), dpi=100)
         ax = plt.gca()
         cout = np.insert(speed, 0, 0) * 10
         cax = plt.scatter(x_pred, z_pred, marker='o', c=cout)
         plt.xlabel('x (m)', fontsize=fontsize_)
         plt.ylabel('z (m)', fontsize=fontsize_)
-        xlim = ax.get_xlim()
+        xlim = ax.get_xlim() 
         ylim = ax.get_ylim()
-        xmean = np.mean(xlim)
+        xmean = np.mean(xlim) 
         ymean = np.mean(ylim)
         ax.set_xlim([xmean - plot_radius, xmean + plot_radius])
         ax.set_ylim([ymean - plot_radius, ymean + plot_radius])
-        cbar = fig.colorbar(cax, ticks=[0.1, 4, 8, 12])
-        cbar.ax.set_yticklabels(['0m/s', '4m/s', '8m/s', '12m/s'])
+        max_speed = max(cout)
+        min_speed = min(cout)
+        ticks = np.floor(np.linspace(min_speed, max_speed, num=5))
+        cbar = fig.colorbar(cax, ticks=ticks)
+        cbar.ax.set_yticklabels([str(i)+'m/s' for i in ticks])
 
-
-        png_title = "{}_path".format(seq)
+        plt.title('speed heatmap')
+        png_title = "{}_speed".format(seq)
         plt.savefig(plot_path_dir +  "/" + png_title + ".png", bbox_inches='tight', pad_inches=0.1)
         plt.close()
 

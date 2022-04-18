@@ -7,7 +7,7 @@ class BaseOptions():
 
     def __init__(self):
         """Reset the class; indicates the class hasn't been initailized"""
-        self.initialized = False
+        self.initialized = False 
 
     def initialize(self, parser):
         """Define the common options that are used in both training and test."""
@@ -33,7 +33,7 @@ class BaseOptions():
 
         self.initialized = True
         return parser
-
+ 
     def gather_options(self):
         """Initialize our parser with basic options(only once).
         Add additional model-specific and dataset-specific options.
