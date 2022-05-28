@@ -190,11 +190,9 @@ class Pose_RNN(nn.Module):
         out, hc = self.rnn(fused) if prev is None else self.rnn(fused, prev)
         out = self.rnn_drop_out(out)
         pose = self.regressor(out)
-        angle = pose[:, :, :3]
-        trans = pose[:, :, 3:]
 
         hc = (hc[0].transpose(1, 0).contiguous(), hc[1].transpose(1, 0).contiguous())
-        return angle, trans, hc
+        return pose, hc
 
 
 
@@ -213,37 +211,29 @@ class DeepVIO(nn.Module):
         batch_size = fv.shape[0]
         seq_len = fv.shape[1]
 
-        angle_list, trans_list, decision_list, logit_list = [], [], [], []
+        pose_list, decision_list, logit_list = [], [], []
         hidden = torch.zeros(batch_size, self.opt.rnn_hidden_size).to(fv.device) if hc is None else hc[0].contiguous()[:, -1, :]
         fv_alter = torch.zeros_like(fv)
 
         for i in range(seq_len):
             if i == 0 and is_first:
                 # The first relative pose is estimated by both images and imu by default
-                angle, trans, hc = self.Pose_net(fv[:, i, :].unsqueeze(1), None, fi[:, i, :].unsqueeze(1), None, hc)
+                pose, hc = self.Pose_net(fv[:, i, :].unsqueeze(1), None, fi[:, i, :].unsqueeze(1), None, hc)
             else:
                 # Otherwise, sample the decision from the policy network
                 p_in = torch.cat((fi[:, i, :], hidden), -1)
                 logits, decision = self.Policy_net(p_in.detach(), temp)
 
-                # prob = torch.nn.functional.softmax(logits, dim=-1)
-                # weight = torch.rand_like(prob[:,0])  
-                # decision = (weight < prob[:,0]).to(torch.float32)
-                # decision = decision.unsqueeze(1).unsqueeze(1)
-                # decision = torch.cat((decision, 1-decision), -1)
-
                 decision = decision.unsqueeze(1)                   
-                angle, trans, hc = self.Pose_net(fv[:, i, :].unsqueeze(1), fv_alter[:, i, :].unsqueeze(1), fi[:, i, :].unsqueeze(1), decision, hc)
+                pose, hc = self.Pose_net(fv[:, i, :].unsqueeze(1), fv_alter[:, i, :].unsqueeze(1), fi[:, i, :].unsqueeze(1), decision, hc)
                 decision_list.append(decision) 
                 logit_list.append(logits) 
             
-            angle_list.append(angle)
-            trans_list.append(trans)
+            pose_list.append(pose)
             hidden = hc[0].contiguous()[:, -1, :]
 
-        angles = torch.cat(angle_list, dim=1)
-        trans = torch.cat(trans_list, dim=1)
+        poses = torch.cat(pose_list, dim=1)
         decision = torch.cat(decision_list, dim=1)
         logit = torch.cat(logit_list, dim=0)
-
-        return angles, trans, decision, logit, hc
+        probs = torch.nn.functional.softmax(logits, dim=-1)
+        return poses, decision, probs, hc

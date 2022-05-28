@@ -13,9 +13,9 @@ class BaseOptions():
         """Define the common options that are used in both training and test."""
         # basic parameters
         parser.add_argument('--data_dir', type=str, default='./data', help='path to the dataset')
-        parser.add_argument('--seq_len', type=int, default=11, help='sequence length for test')
+        parser.add_argument('--seq_len', type=int, default=51, help='sequence length for test')
         parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
-        parser.add_argument('--model_name', type=str, default='vf_512_if_256_3e-05', help='model name to load')
+        parser.add_argument('--model_name', type=str, default='vf_512_if_256_5e-05', help='model name to load')
         parser.add_argument('--save_dir', type=str, default='results', help='path to save the result')
         parser.add_argument('--img_w', type=int, default=512, help='image width')
         parser.add_argument('--img_h', type=int, default=256, help='image height')
