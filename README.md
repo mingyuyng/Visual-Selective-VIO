@@ -18,6 +18,14 @@ Example command:
 
       python test.py --gpu_ids '0' --model_name 'vf_512_if_256_3e-05'  
 
+The figures and error records will be generated under `results`
+
+## Results example
+
+Estimated path (left) and decision map (right) for path 07 using `vf_512_if_256_5e-05.model`. 
+
+<img src="figures/07_path_2d.png" alt="path" width="300"/> <img src="figures/07_decision_smoothed.png" alt="path" width="300"/>
+
 ## Reference
 
 > Mingyu Yang, Yu Chen, Hun-Seok Kim, "Efficient Deep Visual and Inertial Odometry with Adaptive Visual Modality Selection"
