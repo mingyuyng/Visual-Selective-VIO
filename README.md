@@ -22,9 +22,9 @@ The figures and error records will be generated under `results`
 
 ## Results example
 
-Estimated path (left) and decision map (right) for path 07 using `vf_512_if_256_5e-05.model`. 
+Estimated path (left), speed heatmap (middle) and decision heatmap (right) for path 07 using `vf_512_if_256_5e-05.model`. 
 
-<img src="figures/07_path_2d.png" alt="path" width="300"/> <img src="figures/07_decision_smoothed.png" alt="path" width="300"/>
+<img src="figures/07_path_2d.png" alt="path" height="250"/> <img src="figures/07_decision_smoothed.png" alt="path" height="250"/> <img src="figures/07_speed.png" alt="path" height="250"/>
 
 ## Reference
 
