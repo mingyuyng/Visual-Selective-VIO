@@ -3,7 +3,6 @@ from model import DeepVIO
 import numpy as np
 import os
 import torch
-from evaluation import kittiOdomEval
 from options import BaseOptions
 from utils import data_partition, kitti_eva
 
@@ -13,7 +12,6 @@ VIONet = DeepVIO(opt)
 VIONet.load_state_dict(torch.load(opt.load_path, map_location='cpu'))
 VIONet.cuda()
 VIONet.eval()
-pose_eval = kittiOdomEval(opt)
 
 # Set the random seed
 torch.manual_seed(0)
