@@ -26,7 +26,7 @@ def conv(batchNorm, in_planes, out_planes, kernel_size=3, stride=1, dropout=0):
 class Inertial_encoder(nn.Module):
     def __init__(self, opt):
         super(Inertial_encoder, self).__init__()
-        
+
         self.encoder_conv = nn.Sequential(
             nn.Conv1d(6, 64, kernel_size=3, padding=1),
             nn.BatchNorm1d(64),
@@ -73,23 +73,20 @@ class Encoder(nn.Module):
         self.inertial_encoder = Inertial_encoder(opt)
 
     def forward(self, img, imu):
-        # x: (batch, seq_len, channel, width, height)
-        # stack_image
-
         v = torch.cat((img[:, :-1], img[:, 1:]), dim=2)
         batch_size = v.size(0)
         seq_len = v.size(1)
 
-        # CNN
+        # image CNN
         v = v.view(batch_size * seq_len, v.size(2), v.size(3), v.size(4))
-        v_high = self.encode_image(v)
-        v_high = v_high.view(batch_size, seq_len, -1)  # (batch, seq_len, fv)
-        v_high = self.visual_head(v_high)  # (batch, seq_len, 256)
-
+        v = self.encode_image(v)
+        v = v.view(batch_size, seq_len, -1)  # (batch, seq_len, fv)
+        v = self.visual_head(v)  # (batch, seq_len, 256)
+        
+        # IMU CNN
         imu = torch.cat([imu[:, i * 10:i * 10 + 11, :].unsqueeze(1) for i in range(seq_len)], dim=1)
         imu = self.inertial_encoder(imu)
-
-        return v_high, imu
+        return v, imu
 
     def encode_image(self, x):
         out_conv2 = self.conv2(self.conv1(x))
@@ -174,18 +171,17 @@ class Pose_RNN(nn.Module):
             nn.Linear(128, 6))
 
     def forward(self, fv, fv_alter, fi, dec, prev=None):
+        # fv --> (BxNx512): visual features
+        # fv_alter --> (BxNx512): alternative visual features that do not use image encoder (e.g., zero padding)
+        # fi --> (BxNx256): imu features
+        # dec --> (BxNx2): decision mask
+        # prev: LSTM state vectors from the previous time
 
         if prev is not None:
             prev = (prev[0].transpose(1, 0).contiguous(), prev[1].transpose(1, 0).contiguous())
-
-        batch_size = fv.shape[0]
-        seq_len = fi.shape[1]
-
-        if fv_alter is None:
-            v_in = fv
-        else:
-            v_in = fv * dec[:, :, 0].unsqueeze(-1) + fv_alter * dec[:, :, 1].unsqueeze(-1)
-
+        
+        # Select between fv and fv_alter
+        v_in = fv * dec[:, :, :1] + fv_alter * dec[:, :, -1:] if fv_alter is not None else fv
         fused = self.fuse(v_in, fi)
         out, hc = self.rnn(fused) if prev is None else self.rnn(fused, prev)
         out = self.rnn_drop_out(out)
@@ -211,29 +207,30 @@ class DeepVIO(nn.Module):
         batch_size = fv.shape[0]
         seq_len = fv.shape[1]
 
-        pose_list, decision_list, logit_list = [], [], []
+        poses, decisions, logits= [], [], []
         hidden = torch.zeros(batch_size, self.opt.rnn_hidden_size).to(fv.device) if hc is None else hc[0].contiguous()[:, -1, :]
-        fv_alter = torch.zeros_like(fv)
+        fv_alter = torch.zeros_like(fv) # zero padding in the paper 
 
         for i in range(seq_len):
             if i == 0 and is_first:
                 # The first relative pose is estimated by both images and imu by default
-                pose, hc = self.Pose_net(fv[:, i, :].unsqueeze(1), None, fi[:, i, :].unsqueeze(1), None, hc)
+                pose, hc = self.Pose_net(fv[:, i:i+1, :], None, fi[:, i:i+1, :], None, hc)
             else:
                 # Otherwise, sample the decision from the policy network
                 p_in = torch.cat((fi[:, i, :], hidden), -1)
-                logits, decision = self.Policy_net(p_in.detach(), temp)
+                logit, decision = self.Policy_net(p_in.detach(), temp)
 
-                decision = decision.unsqueeze(1)                   
-                pose, hc = self.Pose_net(fv[:, i, :].unsqueeze(1), fv_alter[:, i, :].unsqueeze(1), fi[:, i, :].unsqueeze(1), decision, hc)
-                decision_list.append(decision) 
-                logit_list.append(logits) 
-            
-            pose_list.append(pose)
+                decision = decision.unsqueeze(1)
+                pose, hc = self.Pose_net(fv[:, i:i+1, :], fv_alter[:, i:i+1, :], fi[:, i:i+1, :], decision, hc)
+                decisions.append(decision)
+                logits.append(logit)
+
+            poses.append(pose)
             hidden = hc[0].contiguous()[:, -1, :]
 
-        poses = torch.cat(pose_list, dim=1)
-        decision = torch.cat(decision_list, dim=1)
-        logit = torch.cat(logit_list, dim=0)
+        poses = torch.cat(poses, dim=1)
+        decisions = torch.cat(decisions, dim=1)
+        logits = torch.cat(logits, dim=0)
         probs = torch.nn.functional.softmax(logits, dim=-1)
-        return poses, decision, probs, hc
+
+        return poses, decisions, probs, hc

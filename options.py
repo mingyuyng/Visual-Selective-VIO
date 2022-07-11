@@ -23,6 +23,7 @@ class BaseOptions():
         parser.add_argument('--imu_dropout', type=float, default=0, help='dropout for the IMU encoder')
         parser.add_argument('--test_list', type=list, default=['05', '07', '10'], help='sequences to test')
         parser.add_argument('--window_size', type=int, default=30, help='window size to smooth the decisions')
+        parser.add_argument('--seed', type=int, default=0, help='random seed')
 
         # model parameters
         parser.add_argument('--rnn_hidden_size', type=int, default=1024, help='size of the LSTM latent')

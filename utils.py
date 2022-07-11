@@ -164,8 +164,8 @@ def moving_average(x, w):
 
 
 def rmse_err_cal(pose_est, pose_gt):
-    t_rmse = np.sqrt(np.mean((pose_est[:,3:]-pose_gt[:, 3:])**2))
-    r_rmse = np.sqrt(np.mean((pose_est[:,:3]-pose_gt[:, :3])**2))
+    t_rmse = np.sqrt(np.mean(np.sum((pose_est[:,3:]-pose_gt[:, 3:])**2, -1)))
+    r_rmse = np.sqrt(np.mean(np.sum((pose_est[:,:3]-pose_gt[:, :3])**2, -1)))
     return t_rmse, r_rmse
 
 def trajectoryDistances(poses):
@@ -392,4 +392,4 @@ def kitti_eva(opt, test_video, pose_est, dec_est, prob_est, pose_gt):
     print ("Average sequence rotational error (deg/100m): {0:.4f}".format(r_rel/np.pi * 180*100))
     print ("Translational RMSE (m): {0:.4f}".format(t_rmse))
     print ("Rotational RMSE (deg): {0:.4f}".format(r_rmse/np.pi * 180))
-    print ("Average usage rate: {0:.4f}".format(np.mean(dec_est)))
+    print ("Average usage rate: {0:.4f}".format(np.mean(dec_est) *100))

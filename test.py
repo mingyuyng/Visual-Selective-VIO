@@ -14,9 +14,8 @@ VIONet.cuda()
 VIONet.eval()
 
 # Set the random seed
-torch.manual_seed(0)
-np.random.seed(0)
-
+torch.manual_seed(opt.seed)
+np.random.seed(opt.seed)
 
 # Evaluate each test video
 for test_video in opt.test_list:
@@ -32,9 +31,8 @@ for test_video in opt.test_list:
 
         x_in = image_seq.unsqueeze(0).cuda()
         i_in = imu_seq.unsqueeze(0).cuda()
-        flag = True if i == 0 else False
         with torch.no_grad():
-            pose, decision, probs, hc = VIONet(x_in, i_in, is_first=flag, hc=hc)
+            pose, decision, probs, hc = VIONet(x_in, i_in, is_first=(i==0), hc=hc)
         
         pose_list.append(pose.squeeze(0).detach().cpu().numpy())
         decision_list.append(decision.squeeze(0).detach().cpu().numpy()[:, 0])
@@ -45,3 +43,4 @@ for test_video in opt.test_list:
     prob_est = np.vstack(probs_list)
     
     kitti_eva(opt, test_video, pose_est, dec_est, prob_est, df.poses)
+    print('*'*15)
