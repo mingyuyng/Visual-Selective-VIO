@@ -10,6 +10,17 @@ The code in this repository is tested on KITTI Odometry dataset. To download the
 
 After downloading the dataset, run `preprocess.py` to generate relative poses.
 
+## IMU data format
+
+The IMU data has 6 dimentions: 
+
+1. acceleration in x, i.e. in direction of vehicle front (m/s^2)
+2. acceleration in y, i.e. in direction of vehicle left (m/s^2)
+3. acceleration in z, i.e. in direction of vehicle top (m/s^2)
+4. angular rate around x (rad/s)
+5. angular rate around y (rad/s)
+6. angular rate around z (rad/s)
+
 ## Download pretrainined models
 
 Two pretrained models `vf_512_if_256_3e-05.model` and `vf_512_if_256_5e-05.model` are provided in [Link](https://drive.google.com/drive/folders/1KrxpvUV9Bn5SwUlrDKe76T2dqF1ooZyk). Please download the models and place them under `models` directory.
