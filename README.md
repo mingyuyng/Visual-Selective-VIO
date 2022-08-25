@@ -1,4 +1,4 @@
-# Visual-Selective-VIO
+# Visual-Selective-VIO (ECCV 2022)
 
 This is the test code for the paper "Efficient Deep Visual and Inertial Odometry with Adaptive Visual Modality Selection". 
 
