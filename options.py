@@ -7,7 +7,7 @@ class BaseOptions():
 
     def __init__(self):
         """Reset the class; indicates the class hasn't been initailized"""
-        self.initialized = False 
+        self.initialized = False
 
     def initialize(self, parser):
         """Define the common options that are used in both training and test."""
@@ -21,7 +21,7 @@ class BaseOptions():
         parser.add_argument('--img_h', type=int, default=256, help='image height')
         parser.add_argument('--fuse_method', type=str, default='cat', help='fuse method')
         parser.add_argument('--imu_dropout', type=float, default=0, help='dropout for the IMU encoder')
-        parser.add_argument('--test_list', type=list, default=['05', '07', '10'], help='sequences to test')
+        parser.add_argument('--test_list', type=list, default=['05','07','10'], help='sequences to test')
         parser.add_argument('--window_size', type=int, default=30, help='window size to smooth the decisions')
         parser.add_argument('--seed', type=int, default=0, help='random seed')
 
@@ -34,7 +34,7 @@ class BaseOptions():
 
         self.initialized = True
         return parser
- 
+
     def gather_options(self):
         """Initialize our parser with basic options(only once).
         Add additional model-specific and dataset-specific options.
