@@ -1,6 +1,6 @@
 #!/bin/sh
 
-wget -bqc https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_color.zip    # download the KITTI ODOMETRY dataset
+wget -c https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_color.zip    # download the KITTI ODOMETRY dataset
 unzip data_odometry_color.zip
 mkdir sequences 
 mv dataset/sequences/* sequences/
@@ -11,7 +11,7 @@ do
 	rm -r 'sequences/'$i
 done
 
-wget -bqc https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_poses.zip    # download the KITTI ODOMETRY groundtruth poses
+wget -c https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_poses.zip    # download the KITTI ODOMETRY groundtruth poses
 unzip data_odometry_poses.zip
 mkdir poses
 mv dataset/poses/* poses/
