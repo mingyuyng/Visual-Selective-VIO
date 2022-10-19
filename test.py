@@ -34,7 +34,6 @@ parser.add_argument('--rnn_dropout_between', type=float, default=0.2, help='drop
 
 parser.add_argument('--workers', type=int, default=4, help='number of workers')
 parser.add_argument('--experiment_name', type=str, default='test', help='experiment name')
-parser.add_argument('--optimizer', type=str, default='Adam', help='type of optimizer [Adam, SGD]')
 parser.add_argument('--model', type=str, default='./pretrain_models/vf_512_if_256_3e-05.model', help='path to the pretrained model')
 
 args = parser.parse_args()
