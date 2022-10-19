@@ -1,14 +1,15 @@
 # Visual-Selective-VIO (ECCV 2022)
 
-This is the test code for the paper "Efficient Deep Visual and Inertial Odometry with Adaptive Visual Modality Selection". 
+This repository contains the codes for [Efficient Deep Visual and Inertial Odometry with Adaptive Visual Modality Selection (ECCV '22)](https://arxiv.org/pdf/2205.06187.pdf). 
 
-![Structure](figures/figure.png)  
+<img src="figures/figure.png" alt="overview" width="700"/> 
 
 ## Data Preparation
 
-The code in this repository is tested on KITTI Odometry dataset. To download the KITTI dataset, please run `data/data_prep.sh`. The IMU data after pre-processing is provided under `data/imus`. 
+The code in this repository is tested on KITTI Odometry dataset. The IMU data after pre-processing is provided under `data/imus`. To download the images and poses, please run
 
-After downloading the dataset, run `preprocess.py` to generate relative poses.
+      $cd data
+      $source data_prep.sh 
 
 ## IMU data format
 
@@ -23,19 +24,15 @@ The IMU data has 6 dimentions:
 
 ## Download pretrainined models
 
-Two pretrained models `vf_512_if_256_3e-05.model` and `vf_512_if_256_5e-05.model` are provided in [Link](https://drive.google.com/drive/folders/1KrxpvUV9Bn5SwUlrDKe76T2dqF1ooZyk). Please download the models and place them under `models` directory.
+We provide two pretrained checkpoints `vf_512_if_256_3e-05.model` and `vf_512_if_256_5e-05.model` and two pretrained FlowNet models in [Link](https://drive.google.com/drive/folders/1KrxpvUV9Bn5SwUlrDKe76T2dqF1ooZyk). Please download them and place them under `pretrain_models` directory.
 
-## Test the model
+## Test the pretrained model
 
 Example command:
 
-      python test.py --gpu_ids '0' --model_name 'vf_512_if_256_3e-05'  
+      python test.py --data_dir './data' --model './pretrain_models/vf_512_if_256_5e-05.model' --gpu_ids '0' --experiment_name 'pretrained'
 
-The figures and error records will be generated under `results`
-
-## Results example
-
-Estimated path (left), speed heatmap (middle) and decision heatmap (right) for path 07 using `vf_512_if_256_5e-05.model`. 
+The figures and error records will be generated under `./results/pretrained/files` The estimated path (left), speed heatmap (middle) and decision heatmap (right) for path 07 is shown below: 
 
 <img src="figures/07_path_2d.png" alt="path" height="230"/> <img src="figures/07_decision_smoothed.png" alt="path" height="230"/> <img src="figures/07_speed.png" alt="path" height="230"/>
 
